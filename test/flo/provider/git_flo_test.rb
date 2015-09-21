@@ -27,6 +27,8 @@ module Flo
         repo = Rugged::Repository.init_at(File.join(dir, '.git'))
         initial_commit = Rugged::Commit.create(repo, { author: { email: "none@example.com", name: 'none'}, message: "Empty commit", tree: repo.index.write_tree, parents: [] } )
         repo.branches.create('master', initial_commit)
+        repo.remotes.create('origin', 'ssh://github.com/assistly/git_flo.git')
+
         repo
       end
 
@@ -53,6 +55,18 @@ module Flo
           assert repo.head.name.include? existing_branch_name
 
         end
+
+      end
+
+      def test_check_out_or_create_branch_fetches_from_origin
+        fetch_called = false
+        in_a_temp_repo do |dir, repo|
+          repo.stub(:fetch, lambda { fetch_called = true}) do
+            subject.check_out_or_create_branch(name: 'foo')
+          end
+        end
+
+        assert fetch_called
 
       end
 

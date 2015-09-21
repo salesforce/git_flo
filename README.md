@@ -6,6 +6,8 @@ TODO: Delete this and the text above, and describe your gem
 
 ## Installation
 
+If you want connect to a repository over ssh, you must have `libssh2` installed on your machine.  You will have to reinstall the `rugged` gem after installation of `libssh2`
+
 Add this line to your application's Gemfile:
 
 ```ruby
