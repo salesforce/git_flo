@@ -19,8 +19,8 @@ module Flo
         name = opts[:name]
         ref = opts[:source] || 'master'
 
-        if remote
-          repo.fetch(remote['name'], credentials: credentials)
+        if @remote
+          repo.fetch(@remote[:name], credentials: credentials)
         end
 
         if repo.branches.exist? name
@@ -42,7 +42,7 @@ module Flo
 
       def determine_creds_from_args(args={})
         if args[:use_agent]
-          Rugged::Credentials::SshKeyFromAgent.new(username: @remote['user'])
+          Rugged::Credentials::SshKeyFromAgent.new(username: @remote[:user])
         end
       end
 

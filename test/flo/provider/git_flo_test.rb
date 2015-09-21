@@ -8,7 +8,11 @@ module Flo
     class GitFloTest < ::GitFlo::UnitTest
 
       def subject
-        @subject ||= ::Flo::Provider::GitFlo.new
+        @subject ||= begin
+          opts          = {}
+          opts[:remote] = @remote if @remote
+          ::Flo::Provider::GitFlo.new(opts)
+        end
       end
 
 
@@ -18,16 +22,17 @@ module Flo
 
           repo = initialize_repo(dir)
 
+
           @subject = ::Flo::Provider::GitFlo.new(repo_location: dir)
           yield(dir, repo)
         end
       end
 
       def initialize_repo(dir)
-        repo = Rugged::Repository.init_at(File.join(dir, '.git'))
-        initial_commit = Rugged::Commit.create(repo, { author: { email: "none@example.com", name: 'none'}, message: "Empty commit", tree: repo.index.write_tree, parents: [] } )
+        repo           = Rugged::Repository.init_at(File.join(dir, '.git'))
+        initial_commit = Rugged::Commit.create(repo, { author: { email: "none@example.com", name: 'none' }, message: "Empty commit", tree: repo.index.write_tree, parents: [] })
         repo.branches.create('master', initial_commit)
-        repo.remotes.create('origin', 'ssh://github.com/assistly/git_flo.git')
+        # repo.remotes.create('origin', 'ssh://github.com/assistly/git_flo.git')
 
         repo
       end
@@ -53,23 +58,40 @@ module Flo
           subject.check_out_or_create_branch(name: existing_branch_name)
 
           assert repo.head.name.include? existing_branch_name
-
         end
-
       end
 
       def test_check_out_or_create_branch_fetches_from_origin
-        fetch_called = false
+        remote_repo_loc      = nil
+        commit_sha           = nil
+        @remote = {name: 'origin'}
+        existing_branch_name = 'foo'
         in_a_temp_repo do |dir, repo|
-          repo.stub(:fetch, lambda { fetch_called = true}) do
-            subject.check_out_or_create_branch(name: 'foo')
+          puts dir
+          puts repo
+          remote_repo_loc = dir
+
+          repo.branches.create(existing_branch_name, 'master')
+          # binding.pry
+
+          commit_sha = Rugged::Commit.create(repo, { author: { email: "none@example.com", name: 'none' }, message: "Second Commiting", tree: repo.branches['foo'].target.tree, parents: [repo.branches['foo'].target], update_ref: repo.branches['foo'].canonical_name })
+          puts commit_sha
+
+          #index.read_tree(repo.head.target.tree)
+
+          in_a_temp_repo do |dir, subject_repo|
+            puts dir
+            puts subject_repo
+            repo.remotes.create('origin', dir)
+
+
+            subject.check_out_or_create_branch(name: existing_branch_name)
+
+            assert subject_repo.head.name.include? existing_branch_name
+            assert_equal commit_sha, subject_repo.head.target.oid
           end
         end
-
-        assert fetch_called
-
       end
-
     end
   end
 end
