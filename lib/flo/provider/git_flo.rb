@@ -1,6 +1,10 @@
 require 'ostruct'
 require 'rugged'
 
+module GitFlo
+  MissingRefError = Class.new(StandardError)
+end
+
 module Flo
   module Provider
     class GitFlo
@@ -19,17 +23,27 @@ module Flo
         name = opts[:name]
         ref = opts[:source] || 'master'
 
+        validate_branch_exists(ref)
+
         if @remote
           repo.fetch(@remote[:name], credentials: credentials)
         end
 
         if repo.branches.exist? name
-          repo.checkout(name)
+          # noop
+        elsif repo.branches.exist? "origin/#{name}"
+          repo.create_branch(name, "origin/#{name}")
         else
-          repo.branches.create(name, ref)
-          repo.checkout(name)
+          repo.create_branch(name, ref)
         end
+
+        repo.checkout(name)
         OpenStruct.new(success?: true)
+      end
+
+      def push(opts={})
+        branch_name = opts[:branch]
+        raise NotImplementedError.new('This should probably get implemented to get the tests green')
       end
 
       private
@@ -43,6 +57,12 @@ module Flo
       def determine_creds_from_args(args={})
         if args[:use_agent]
           Rugged::Credentials::SshKeyFromAgent.new(username: @remote[:user])
+        end
+      end
+
+      def validate_branch_exists(branch)
+        unless repo.branches.exist?(branch)
+          raise ::GitFlo::MissingRefError.new("Cannot create branch, as source branch #{branch} does not exist")
         end
       end
 
