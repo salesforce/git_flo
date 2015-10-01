@@ -10,25 +10,24 @@ module Flo
       def subject
         @subject ||= begin
           opts = { repo_location: @repo_location }
-          opts[:remote] = @remote if @remote
           ::Flo::Provider::GitFlo.new(opts)
         end
       end
 
 
-      def in_a_temp_repo
+      def in_a_temp_repo(repo_options=nil)
         # Note: the temp directory is automatically removed at the end of the block
         Dir.mktmpdir do |dir|
           @repo_location = dir
 
-          repo = initialize_repo(dir)
+          repo = initialize_repo(dir, repo_options)
 
           yield(dir, repo)
         end
       end
 
-      def initialize_repo(dir)
-        repo = Rugged::Repository.init_at(File.join(dir, '.git'))
+      def initialize_repo(dir, opts=nil)
+        repo = Rugged::Repository.init_at(File.join(dir, '.git'), opts)
         initial_commit = create_empty_commit(repo: repo, initial_commit: true)
         repo.branches.create('master', initial_commit)
 
@@ -86,7 +85,7 @@ module Flo
         @remote = {name: 'origin'}
         remote_branch_name = 'remote_branch'
 
-        in_a_temp_repo do |remote_repo_dir, remote_repo|
+        in_a_temp_repo(:bare) do |remote_repo_dir, remote_repo|
           remote_repo.branches.create(remote_branch_name, 'master')
 
           commit_sha = create_empty_commit(repo: remote_repo, branch: remote_branch_name)
@@ -116,7 +115,7 @@ module Flo
       def test_push_pushes_specific_branch_to_remote
         subject_branch = "branch_to_submit"
 
-        in_a_temp_repo do |remote_repo_dir, remote_repo|
+        in_a_temp_repo(:bare) do |remote_repo_dir, remote_repo|
 
           in_a_temp_repo do |_, subject_repo|
 
@@ -131,7 +130,7 @@ module Flo
             refute remote_repo.branches.exist?(subject_branch), 'Test setup failed, branch should not yet exist on remote'
             refute remote_repo.include?(commit_sha), 'Test setup failed, new commit should not yet exist on remote'
 
-            subject.push(branch: subject_branch)
+            subject.push(branch: subject_branch, remote: 'origin')
 
             assert remote_repo.branches.exist?(subject_branch), 'The subject branch was not pushed to the remote repo'
             assert_equal commit_sha, remote_repo.branches[subject_branch].target.oid, "The branch on the remote repo does not match the local repo"

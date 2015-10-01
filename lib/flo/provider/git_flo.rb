@@ -11,22 +11,19 @@ module Flo
 
       def initialize(opts={})
         @repo_location = opts[:repo_location] || '.'
-        @remote = opts[:remote]
-        if @remote
-          @credentials = opts[:credentials]
 
-          @credentials ||= determine_creds_from_args(opts[:remote])
-        end
+        @credentials = opts[:credentials]
       end
 
       def check_out_or_create_branch(opts={})
         name = opts[:name]
         ref = opts[:source] || 'master'
+        remote = opts[:remote] || 'origin'
 
         validate_branch_exists(ref)
 
-        if @remote
-          repo.fetch(@remote[:name], credentials: credentials)
+        if repo.remotes[remote]
+          repo.fetch(remote, credentials: credentials)
         end
 
         if repo.branches.exist? name
@@ -42,8 +39,11 @@ module Flo
       end
 
       def push(opts={})
-        branch_name = opts[:branch]
-        raise NotImplementedError.new('This should probably get implemented to get the tests green')
+        remote = opts[:remote] || 'origin'
+        branch_name = repo.branches[opts[:branch]].canonical_name
+        repo.push(remote, branch_name)
+
+        OpenStruct.new(success?: true)
       end
 
       private
@@ -52,12 +52,6 @@ module Flo
 
       def repo
         @repo ||= Rugged::Repository.discover(@repo_location)
-      end
-
-      def determine_creds_from_args(args={})
-        if args[:use_agent]
-          Rugged::Credentials::SshKeyFromAgent.new(username: @remote[:user])
-        end
       end
 
       def validate_branch_exists(branch)
