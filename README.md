@@ -1,4 +1,5 @@
 # GitFlo
+[![Gem Version](https://badge.fury.io/rb/flo.svg)](https://badge.fury.io/rb/git_flo) [![Code Climate](https://codeclimate.com/github/codeclimate/codeclimate/badges/gpa.svg)](https://codeclimate.com/github/codeclimate/codeclimate) [![Build Status](https://semaphoreci.com/api/v1/justinpowers/git_flo/branches/master/shields_badge.svg)](https://semaphoreci.com/justinpowers/git_flo)
 
 GitFlo is a Git plugin for the Flo workflow automation library.  If you aren't familiar with Flo, then please start [here](https://github.com/salesforce/flo)
 
