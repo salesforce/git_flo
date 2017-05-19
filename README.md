@@ -1,12 +1,8 @@
 # GitFlo
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/git_flo`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+GitFlo is a Git plugin for the Flo workflow automation library.  If you aren't familiar with Flo, then please start [here](https://github.com/salesforce/flo)
 
 ## Installation
-
-If you want connect to a repository over ssh, you must have `libssh2` installed on your machine.  You will have to reinstall the `rugged` gem after installation of `libssh2`
 
 Add this line to your application's Gemfile:
 
@@ -22,19 +18,42 @@ Or install it yourself as:
 
     $ gem install git_flo
 
+## Compatibility
+
+GitFlo uses the Rugged rubygem, which includes C bindings to the libgit2 C library.  For this reason, this gem is not expected to work with jruby.  For more information on Rugged, [check it out on Github](https://github.com/libgit2/rugged)
+
+## Configuration
+
+In your Flo configuration file, configure git inside the `config` block
+
+```ruby
+config do |cfg|
+  cfg.provider :git_flo, { credentials: Rugged::Credentials::SshKeyFromAgent.new(username: 'git') }
+end
+```
+
+If you will not be running flo within your local git repository, you can pass in a `:repo_location` option to specify where the git repo exists.
+
+If you wish to push to a repo requiring authentication, you must specify a `credentials` provider.  See the [Rugged::Credentials module](https://github.com/libgit2/rugged/blob/master/lib/rugged/credentials.rb) for options.
+
 ## Usage
 
-TODO: Write usage instructions here
+Specify the commands you wish to run in the `register_command` block.  For example
+```ruby
+# Checks out a branch with the name "my_new_branch".  If the branch does not exist, a new branch is created based off the master branch
+perform :git_flo, :check_out_or_create_branch, { from: 'master', name: 'my_new_branch' }
 
-## Development
-
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake test` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
-
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+# pushes the 'my_new_branch' up to the 'origin' remote repo.  This will raise an error if this would result in a force push
+perform :git_flo, :push, { branch: 'my_new_branch' }
+```
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/git_flo. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](contributor-covenant.org) code of conduct.
+1. Fork it (http://github.com/your-github-username/flo/fork )
+2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Commit your changes (`git commit -am 'Add some feature'`)
+4. Push to the branch (`git push origin my-new-feature`)
+5. Create new Pull Request
 
 
 ## License
