@@ -48,6 +48,10 @@ module Flo
             email: "none@example.com",
             name: 'none'
           },
+          committer: {
+            email: "none@example.com",
+            name: 'none'
+          },
           message: message
         }
         if opts[:initial_commit]
