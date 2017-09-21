@@ -47,7 +47,7 @@ module Flo
       def push(opts={})
         remote = opts[:remote] || 'origin'
         branch_name = repo.branches[opts[:branch]].canonical_name
-        repo.push(remote, branch_name)
+        repo.push(remote, branch_name, credentials: credentials)
 
         OpenStruct.new(success?: true)
       end
