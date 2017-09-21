@@ -1,5 +1,5 @@
 # GitFlo
-[![Gem Version](https://badge.fury.io/rb/flo.svg)](https://badge.fury.io/rb/git_flo) [![Code Climate](https://codeclimate.com/github/codeclimate/codeclimate/badges/gpa.svg)](https://codeclimate.com/github/codeclimate/codeclimate) [![Build Status](https://semaphoreci.com/api/v1/justinpowers/git_flo/branches/master/shields_badge.svg)](https://semaphoreci.com/justinpowers/git_flo)
+[![Gem Version](https://badge.fury.io/rb/git_flo.svg)](https://badge.fury.io/rb/git_flo) [![Code Climate](https://codeclimate.com/github/codeclimate/codeclimate/badges/gpa.svg)](https://codeclimate.com/github/codeclimate/codeclimate) [![Build Status](https://semaphoreci.com/api/v1/justinpowers/git_flo/branches/master/shields_badge.svg)](https://semaphoreci.com/justinpowers/git_flo)
 
 GitFlo is a Git plugin for the Flo workflow automation library.  If you aren't familiar with Flo, then please start [here](https://github.com/salesforce/flo)
 
@@ -50,7 +50,7 @@ perform :git_flo, :push, { branch: 'my_new_branch' }
 
 ## Contributing
 
-1. Fork it (http://github.com/your-github-username/flo/fork )
+1. Fork it (http://github.com/your-github-username/git_flo/fork )
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)

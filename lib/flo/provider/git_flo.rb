@@ -5,6 +5,7 @@
 
 require 'ostruct'
 require 'rugged'
+require 'flo/provider/base'
 
 module GitFlo
   MissingRefError = Class.new(StandardError)
@@ -12,7 +13,7 @@ end
 
 module Flo
   module Provider
-    class GitFlo
+    class GitFlo < Flo::Provider::Base
 
       def initialize(opts={})
         @repo_location = opts[:repo_location] || '.'
